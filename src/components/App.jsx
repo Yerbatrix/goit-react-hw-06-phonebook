@@ -1,31 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import ContactForm from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
+import { addContact, deleteContact } from '../redux/contactsSlice';
+import { setFilter } from '../redux/filterSlice';
 
 const App = () => {
-  const [contacts, setContacts] = useState(() => {
-    const storedContacts = JSON.parse(localStorage.getItem('contacts'));
-    return storedContacts ? storedContacts : [];
-  });
-  const [filter, setFilter] = useState('');
+  const contacts = useSelector(state => state.contacts);
+  const filter = useSelector(state => state.filter);
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    localStorage.setItem('contacts', JSON.stringify(contacts));
-  }, [contacts]);
-
-  const addContact = newContact => {
-    setContacts(prevContacts => [...prevContacts, newContact]);
+  const handleAddContact = newContact => {
+    dispatch(addContact(newContact));
   };
 
-  const deleteContact = id => {
-    setContacts(prevContacts =>
-      prevContacts.filter(contact => contact.id !== id)
-    );
+  const handleDeleteContact = id => {
+    dispatch(deleteContact(id));
   };
 
-  const handleChange = evt => {
-    setFilter(evt.target.value);
+  const handleFilterChange = evt => {
+    dispatch(setFilter(evt.target.value));
   };
 
   const filteredContacts = contacts.filter(contact =>
@@ -35,13 +30,13 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
-      <ContactForm onSubmit={addContact} contacts={contacts} />
+      <ContactForm onSubmit={handleAddContact} contacts={contacts} />
       <h2>Contacts</h2>
-      <Filter value={filter} onChange={handleChange} />
+      <Filter value={filter} onChange={handleFilterChange} />
       <h2>Contact List</h2>
       <ContactList
         contacts={filteredContacts}
-        onDeleteContact={deleteContact}
+        onDeleteContact={handleDeleteContact}
       />
     </div>
   );
